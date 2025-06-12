@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>微信表白 - 动态按钮扩展</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+      position: relative;
+      padding: 20px;
+    }
+
+    .hearts {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .heart {
+      position: absolute;
+      color: rgba(255, 105, 180, 0.7);
+      font-size: 24px;
+      opacity: 0;
+      animation: float 8s infinite ease-in;
+    }
+
+    @keyframes float {
+      0% {
+        opacity: 0;
+        transform: translateY(0) rotate(0deg) scale(0.5);
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 0.7;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) rotate(360deg) scale(1.2);
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 25px;
+      padding: 35px 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      backdrop-filter: blur(8px);
+      animation: fadeIn 1s ease-out;
+      overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .title {
+      color: #ff3366;
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      display: inline-block;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .title::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 15%;
+      width: 70%;
+      height: 4px;
+      background: linear-gradient(to right, transparent, #ff3366, transparent);
+      border-radius: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1.2rem;
+      margin-top: 25px;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .character {
+      margin: 30px 0;
+      position: relative;
+      animation: bounce 4s infinite;
+      display: flex;
+      justify-content: center;
+    }
+
+    .character img {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 6px solid #ff9999;
+      box-shadow: 0 15px 35px rgba(255, 105, 180, 0.4);
+      object-fit: cover;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .question {
+      font-size: 2rem;
+      margin: 35px 0;
+      color: #ff3366;
+      font-weight: bold;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px 30px;
+      background: linear-gradient(to right, rgba(255, 246, 246, 0.8), rgba(255, 230, 230, 0.8));
+      border-radius: 20px;
+      display: inline-block;
+      box-shadow: 0 8px 20px rgba(255, 150, 150, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% {
+        left: -100%;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
+
+    .buttons-container {
+      position: relative;
+      min-height: 120px;
+      margin: 40px 0 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
+      gap: 20px;
+      position: relative;
+      height: 100px;
+    }
+
+    .btn {
+      padding: 18px 0;
+      border: none;
+      border-radius: 50px;
+      font-size: 1.8rem;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 2;
+      transform-origin: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      min-height: 80px;
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .btn:hover::after {
+      opacity: 1;
+    }
+
+    .btn-yes {
+      background: linear-gradient(to right, #ff9999, #ff6666);
+      color: white;
+      width: 45%;
+      transition: width 0.5s, transform 0.3s, scale 0.5s;
+    }
+
+    .btn-yes i {
+      margin-right: 10px;
+      animation: pulse 2s infinite;
+    }
+
+    .btn-yes:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(255, 102, 102, 0.4);
+    }
+
+    .btn-yes:active {
+      transform: translateY(2px);
+    }
+
+    .btn-no {
+      background: linear-gradient(to right, #cccccc, #aaaaaa);
+      color: #666;
+      width: 45%;
+      transition: width 0.5s, transform 0.3s, opacity 0.5s;
+    }
+
+    .btn-no i {
+      margin-right: 10px;
+    }
+
+    .btn-no:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(170, 170, 170, 0.4);
+    }
+
+    .btn-no:active {
+      transform: translateY(2px);
+    }
+
+    .result {
+      display: none;
+      font-size: 2.8rem;
+      font-weight: bold;
+      color: #ff3366;
+      margin: 40px 0;
+      padding: 25px;
+      background: linear-gradient(to right, rgba(255, 246, 246, 0.8), rgba(255, 230, 230, 0.8));
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(255, 150, 150, 0.3);
+      animation: pulse 1.5s infinite;
+      line-height: 1.4;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .animation {
+      display: none;
+      margin: 40px 0 30px;
+    }
+
+    .animation img {
+      width: 200px;
+      height: 200px;
+      animation: bounce 1.5s infinite;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .hint {
+      color: #ff3366;
+      font-size: 1.3rem;
+      margin: 25px 0;
+      font-style: italic;
+      min-height: 30px;
+      font-weight: bold;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 15px;
+      display: inline-block;
+      max-width: 90%;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .floating-text {
+      position: absolute;
+      color: #ff3366;
+      font-weight: bold;
+      font-size: 1.4rem;
+      opacity: 0;
+      pointer-events: none;
+      animation: floatText 2.5s ease-out;
+      white-space: nowrap;
+      z-index: 5;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 5px 15px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes floatText {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(1.5);
+      }
+    }
+
+    .instructions {
+      background: linear-gradient(to right, rgba(255, 246, 246, 0.8), rgba(255, 230, 230, 0.8));
+      border-radius: 20px;
+      padding: 20px;
+      margin: 30px 0;
+      border-left: 6px solid #ff9999;
+      text-align: left;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .instructions h3 {
+      color: #ff3366;
+      margin-bottom: 15px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .instructions p {
+      color: #666;
+      font-size: 1.1rem;
+      line-height: 1.7;
+    }
+
+    .footer {
+      margin-top: 30px;
+      color: #999;
+      font-size: 1rem;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .counter {
+      position: absolute;
+      top: -45px;
+      background: #ff3366;
+      color: white;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      box-shadow: 0 8px 20px rgba(255, 51, 102, 0.4);
+      animation: pop 0.6s;
+      z-index: 4;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0);
+      }
+
+      70% {
+        transform: scale(1.2);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .heart-pulse {
+      position: absolute;
+      top: -25px;
+      right: -25px;
+      color: #ff3366;
+      font-size: 36px;
+      animation: pulse 1.2s infinite;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 新页面样式 */
+    .success-page {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #ff3366, #ff758c);
+      z-index: 100;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .success-page h1 {
+      font-size: 4rem;
+      margin-bottom: 30px;
+      text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .success-page p {
+      font-size: 1.8rem;
+      margin-bottom: 40px;
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    .success-page img {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 10px solid white;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      margin-bottom: 40px;
+      animation: bounce 2s infinite;
+    }
+
+    .success-hearts {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .title {
+        font-size: 2.3rem;
+      }
+
+      .subtitle {
+        font-size: 1.1rem;
+      }
+
+      .character img {
+        width: 140px;
+        height: 140px;
+      }
+
+      .question {
+        font-size: 1.7rem;
+        padding: 15px 20px;
+      }
+
+      .btn {
+        font-size: 1.5rem;
+        padding: 15px 0;
+        min-height: 70px;
+      }
+
+      .result {
+        font-size: 2.2rem;
+        padding: 20px;
+      }
+
+      .success-page h1 {
+        font-size: 3rem;
+      }
+
+      .success-page p {
+        font-size: 1.4rem;
+      }
+
+      .success-page img {
+        width: 200px;
+        height: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 25px 20px;
+      }
+
+      .title {
+        font-size: 1.9rem;
+      }
+
+      .question {
+        font-size: 1.5rem;
+        padding: 12px 18px;
+      }
+
+      .buttons {
+        flex-direction: column;
+        height: auto;
+        gap: 15px;
+      }
+
+      .btn {
+        width: 100% !important;
+        font-size: 1.4rem;
+        padding: 16px 0;
+      }
+
+      .btn-no {
+        height: auto !important;
+        opacity: 1 !important;
+      }
+
+      .result {
+        font-size: 1.8rem;
+      }
+
+      .hint {
+        font-size: 1.1rem;
+      }
+
+      .success-page h1 {
+        font-size: 2.2rem;
+      }
+
+      .success-page p {
+        font-size: 1.2rem;
+      }
+
+      .success-page img {
+        width: 150px;
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hearts" id="hearts"></div>
+
+  <div class="container" id="mainContainer">
+    <div class="header">
+      <h1 class="title">微信表白</h1>
+      <p class="subtitle"></p>
+    </div>
+
+    <div class="character">
+      <img
+        src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80"
+        alt="可爱角色">
+      <div class="heart-pulse">❤</div>
+    </div>
+
+    <div class="question">可以和我和好吗？</div>
+
+    <div class="buttons-container">
+      <div class="buttons" id="buttons">
+        <button id="btnYes" class="btn btn-yes" onclick="accept()">
+          <i class="fas fa-heart"></i> 可以
+        </button>
+        <button id="btnNo" class="btn btn-no" onclick="reject()">
+          <i class="fas fa-times"></i> 不要
+        </button>
+      </div>
+    </div>
+
+    <div class="hint" id="hint"></div>
+
+    <div class="result" id="result"></div>
+
+    <div class="animation" id="animation">
+      <img src="celebrate.png" alt="拥抱动画">
+    </div>
+  </div>
+
+  <!-- 新页面 -->
+  <div class="success-page" id="successPage">
+    <div class="success-hearts" id="successHearts"></div>
+    <img src="hug.png" alt="庆祝">
+    <h1>太棒了！</h1>
+    <p>你做出了最棒的选择！我们和好吧！❤️</p>
+    <p style="font-size: 1.2rem; margin-top: 30px;">(点击任意位置返回)</p>
+  </div>
+
+  <script>
+    // 创建漂浮的爱心
+    function createHearts() {
+      const heartsContainer = document.getElementById('hearts');
+      const heartCount = 30;
+
+      for (let i = 0; i < heartCount; i++) {
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤';
+        heart.classList.add('heart');
+
+        // 随机位置
+        const left = Math.random() * 100;
+        const delay = Math.random() * 6;
+        const duration = 4 + Math.random() * 4;
+        const size = 20 + Math.random() * 30;
+
+        heart.style.left = `${left}%`;
+        heart.style.animationDelay = `${delay}s`;
+        heart.style.animationDuration = `${duration}s`;
+        heart.style.fontSize = `${size}px`;
+
+        heartsContainer.appendChild(heart);
+      }
+    }
+
+    // 创建成功页面的爱心
+    function createSuccessHearts() {
+      const heartsContainer = document.getElementById('successHearts');
+      const heartCount = 100;
+
+      for (let i = 0; i < heartCount; i++) {
+        const heart = document.createElement('div');
+        heart.innerHTML = '❤';
+        heart.classList.add('heart');
+
+        // 随机位置
+        const left = Math.random() * 100;
+        const delay = Math.random() * 6;
+        const duration = 4 + Math.random() * 4;
+        const size = 20 + Math.random() * 30;
+
+        heart.style.left = `${left}%`;
+        heart.style.animationDelay = `${delay}s`;
+        heart.style.animationDuration = `${duration}s`;
+        heart.style.fontSize = `${size}px`;
+
+        heartsContainer.appendChild(heart);
+      }
+    }
+
+    // 创建漂浮文字
+    function createFloatingText(text, x, y) {
+      const floatingText = document.createElement('div');
+      floatingText.classList.add('floating-text');
+      floatingText.textContent = text;
+      floatingText.style.left = `${x}px`;
+      floatingText.style.top = `${y}px`;
+
+      document.querySelector('.buttons-container').appendChild(floatingText);
+
+      // 动画结束后移除元素
+      setTimeout(() => {
+        floatingText.remove();
+      }, 2500);
+    }
+
+    // 初始化按钮状态
+    let yesWidth = 45; // 百分比
+    let noWidth = 45; // 百分比
+    let clickCount = 0;
+    let noScale = 1;
+    let yesScale = 1;
+
+    // 不同点击次数的提示语
+    const messages = [
+      "再点试试看？",
+      "可以按钮变宽了哦！",
+      "不要按钮变小了！",
+      "继续点我呀~",
+      "你确定要拒绝吗？",
+      "点我可以按钮试试？",
+      "不要按钮要消失啦！",
+      "最后一次机会了哦！",
+      "真的要拒绝我吗？😢",
+      "点我可以按钮有惊喜！"
+    ];
+
+    function accept() {
+      // 显示成功页面
+      document.getElementById('mainContainer').style.display = 'none';
+      document.getElementById('successPage').style.display = 'flex';
+
+      // 创建成功页面的爱心
+      createSuccessHearts();
+
+      // 点击成功页面任意位置返回
+      document.getElementById('successPage').addEventListener('click', function () {
+        document.getElementById('mainContainer').style.display = 'block';
+        document.getElementById('successPage').style.display = 'none';
+      });
+    }
+
+    function reject() {
+      const btnYes = document.getElementById('btnYes');
+      const btnNo = document.getElementById('btnNo');
+      const hint = document.getElementById('hint');
+      const buttonsContainer = document.querySelector('.buttons-container');
+
+      // 增加点击计数
+      clickCount++;
+
+      // 创建计数器
+      const counter = document.createElement('div');
+      counter.classList.add('counter');
+      counter.textContent = clickCount;
+      buttonsContainer.appendChild(counter);
+
+      // 3秒后移除计数器
+      setTimeout(() => {
+        counter.remove();
+      }, 3000);
+
+      // 更新按钮宽度和缩放比例
+      if (yesWidth < 200) { // 不再限制最大宽度
+        yesWidth += 8;
+        noWidth = Math.max(noWidth - 8, 0);
+      }
+
+      // 让"可以"按钮不断放大
+      yesScale += 0.2;
+
+      // 更新按钮缩放比例
+      if (noScale > 0.1) {
+        noScale = Math.max(noScale * 0.7, 0.1);
+      }
+
+      // 应用新宽度和缩放
+      btnYes.style.width = `${yesWidth}%`;
+      btnYes.style.transform = `scale(${yesScale})`;
+      btnNo.style.width = `${noWidth}%`;
+      btnNo.style.transform = `scale(${noScale})`;
+
+      // 创建漂浮文字
+      const rect = btnNo.getBoundingClientRect();
+      const containerRect = buttonsContainer.getBoundingClientRect();
+      const x = rect.left + rect.width / 2 - containerRect.left;
+      const y = rect.top - containerRect.top;
+
+      // 随机选择提示语
+      const randomIndex = Math.min(clickCount - 1, messages.length - 1);
+      const message = messages[randomIndex] || "再点试试看！";
+
+      createFloatingText(message, x, y);
+
+      // 更新提示
+      if (noWidth <= 5) {
+        hint.innerHTML = '<i class="fas fa-exclamation-circle"></i> "不要"按钮已经消失了！现在只能选择"可以"了！';
+        btnNo.style.opacity = '0';
+        btnNo.style.pointerEvents = 'none';
+      } else if (yesWidth >= 95) {
+        hint.innerHTML = '<i class="fas fa-exclamation-circle"></i> "可以"按钮正在变得越来越大！';
+      } else {
+        hint.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+      }
+
+      // 添加按钮跳动效果
+      btnYes.classList.add('highlight');
+      setTimeout(() => {
+        btnYes.classList.remove('highlight');
+      }, 300);
+    }
+
+    // 页面加载时创建爱心
+    window.onload = createHearts;
+  </script>
+</body>
+
+</html>
